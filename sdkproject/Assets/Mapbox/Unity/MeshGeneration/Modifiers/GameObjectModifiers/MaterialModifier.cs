@@ -40,7 +40,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 					mats[i] = _options.materials[i].Materials[UnityEngine.Random.Range(0, _options.materials[i].Materials.Length)];
 				}
 
-				mats[0].mainTexture = tile.GetRasterData();
+				mats[0].mainTexture = tile.RasterData;
 				mats[0].mainTextureScale = new Vector2(1f, 1f);
 			}
 

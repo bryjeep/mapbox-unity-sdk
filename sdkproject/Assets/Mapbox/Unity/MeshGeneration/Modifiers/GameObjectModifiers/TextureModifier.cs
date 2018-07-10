@@ -47,7 +47,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 
 			if (_useSatelliteTexture)
 			{
-				_meshRenderer.materials[0].mainTexture = tile.GetRasterData();
+				_meshRenderer.materials[0].mainTexture = tile.RasterData;
 				_meshRenderer.materials[0].mainTextureScale = new Vector2(1f, 1f);
 			}
         }

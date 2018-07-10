@@ -12,14 +12,24 @@ namespace Mapbox.Unity.MeshGeneration.Data
 	public class UnityTile : MonoBehaviour
 	{
 		[SerializeField]
-		private Texture2D _rasterData;
-		private float[] _heightData;
+		public Texture2D RasterData;
 		private Texture2D _heightTexture;
-		private Texture2D _loadingTexture;
+		private float[] _heightData;
+		private VectorTile _vectorData;
+		public VectorTile VectorData
+		{
+			get { return _vectorData; }
+			set
+			{
+				_vectorData = value;
+				OnVectorDataChanged(this);
+			}
+		}
 
-		private float _relativeScale;
+		private Texture2D _loadingTexture;
 		private List<Tile> _tiles = new List<Tile>();
 
+		#region CachedUnityComponents
 		MeshRenderer _meshRenderer;
 		public MeshRenderer MeshRenderer
 		{
@@ -58,61 +68,49 @@ namespace Mapbox.Unity.MeshGeneration.Data
 				return _collider;
 			}
 		}
+		#endregion
 
-		// TODO: should this be a string???
-		VectorTile _vectorData;
-		public VectorTile VectorData
-		{
-			get { return _vectorData; }
-			set
-			{
-				_vectorData = value;
-				OnVectorDataChanged(this);
-			}
-		}
+		#region Tile Positon/Scale Properties
+		public RectD Rect { get; private set; }
+		public int InitialZoom { get; private set; }
+		public float TileScale { get; private set; }
+		public UnwrappedTileId UnwrappedTileId { get; private set; }
+		public CanonicalTileId CanonicalTileId { get; private set; }
 
-		RectD _rect;
-		public RectD Rect
-		{
-			get
-			{
-				return _rect;
-			}
-		}
-
-		UnwrappedTileId _unwrappedTileId;
-		public UnwrappedTileId UnwrappedTileId
-		{
-			get
-			{
-				return _unwrappedTileId;
-
-			}
-		}
-
-		CanonicalTileId _canonicalTileId;
-		public CanonicalTileId CanonicalTileId
-		{
-			get
-			{
-				return _canonicalTileId;
-			}
-		}
-
-		public int InitialZoom { get; internal set; }
-		public float TileScale { get; internal set; }
+		private float _relativeScale;
+		#endregion
 
 		public TilePropertyState RasterDataState;
 		public TilePropertyState HeightDataState;
 		public TilePropertyState VectorDataState;
 		public bool IsReadyForVectorMeshGeneration;
 
-		public event Action<UnityTile> OnHeightDataChanged = delegate { };
-		public event Action<UnityTile> OnRasterDataChanged = delegate { };
-		public event Action<UnityTile> OnVectorDataChanged = delegate { };
-		public event Action<UnityTile> OnReadyForMeshGeneration = delegate { };
+		
 
-		private void UpdateVectorReadyState(UnityTile tile)
+		internal void Initialize(IMapReadable map, UnwrappedTileId tileId, float scale, int zoom, Texture2D loadingTexture = null)
+		{
+			TileScale = scale;
+			_relativeScale = 1 / Mathf.Cos(Mathf.Deg2Rad * (float)map.CenterLatitudeLongitude.x);
+			Rect = Conversions.TileBounds(tileId);
+			UnwrappedTileId = tileId;
+			CanonicalTileId = tileId.Canonical;
+			_loadingTexture = loadingTexture;
+
+			float scaleFactor = 1.0f;
+			if (InitialZoom == 0)
+			{
+				InitialZoom = zoom;
+			}
+
+			scaleFactor = Mathf.Pow(2, (map.InitialZoom - zoom));
+			gameObject.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+			gameObject.SetActive(true);
+
+			OnHeightDataChanged += UpdateDataState;
+			OnRasterDataChanged += UpdateDataState;
+		}
+
+		private void UpdateDataState(UnityTile tile)
 		{
 			if (RasterDataState != TilePropertyState.Fetching && RasterDataState != TilePropertyState.Processing &&
 				HeightDataState != TilePropertyState.Fetching && HeightDataState != TilePropertyState.Processing)
@@ -123,54 +121,6 @@ namespace Mapbox.Unity.MeshGeneration.Data
 					OnReadyForMeshGeneration(tile);
 				}
 			}
-		}
-
-		private bool _isInitialized = false;
-
-		internal void Initialize(IMapReadable map, UnwrappedTileId tileId, float scale, int zoom, Texture2D loadingTexture = null)
-		{
-			TileScale = scale;
-			_relativeScale = 1 / Mathf.Cos(Mathf.Deg2Rad * (float)map.CenterLatitudeLongitude.x);
-			_rect = Conversions.TileBounds(tileId);
-			_unwrappedTileId = tileId;
-			_canonicalTileId = tileId.Canonical;
-			_loadingTexture = loadingTexture;
-
-			float scaleFactor = 1.0f;
-			if (_isInitialized == false)
-			{
-				_isInitialized = true;
-				InitialZoom = zoom;
-			}
-
-			scaleFactor = Mathf.Pow(2, (map.InitialZoom - zoom));
-			gameObject.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
-			gameObject.SetActive(true);
-
-			OnHeightDataChanged += UpdateVectorReadyState;
-			OnRasterDataChanged += UpdateVectorReadyState;
-		}
-
-		public void Recycle()
-		{
-			if (_loadingTexture && MeshRenderer != null)
-			{
-				MeshRenderer.material.mainTexture = _loadingTexture;
-			}
-
-			gameObject.SetActive(false);
-
-			// Reset internal state.
-			RasterDataState = TilePropertyState.None;
-			HeightDataState = TilePropertyState.None;
-			VectorDataState = TilePropertyState.None;
-
-			OnHeightDataChanged = delegate { };
-			OnRasterDataChanged = delegate { };
-			OnVectorDataChanged = delegate { };
-
-			Cancel();
-			_tiles.Clear();
 		}
 
 		#region SetTileData
@@ -214,9 +164,9 @@ namespace Mapbox.Unity.MeshGeneration.Data
 				IsReadyForVectorMeshGeneration = true;
 			}
 
-			if (_rasterData != null)
+			if (RasterData != null)
 			{
-				MeshRenderer.material.mainTexture = _rasterData;
+				MeshRenderer.material.mainTexture = RasterData;
 			}
 		}
 
@@ -227,23 +177,22 @@ namespace Mapbox.Unity.MeshGeneration.Data
 				return;
 			}
 			// Don't leak the texture, just reuse it.
-			if (_rasterData == null)
+			if (RasterData == null)
 			{
-				_rasterData = new Texture2D(0, 0, TextureFormat.RGB24, useMipMap);
-				_rasterData.wrapMode = TextureWrapMode.Clamp;
+				RasterData = new Texture2D(0, 0, TextureFormat.RGB24, useMipMap);
+				RasterData.wrapMode = TextureWrapMode.Clamp;
 			}
 
-			_rasterData.LoadImage(data);
+			RasterData.LoadImage(data);
 			if (useCompression)
 			{
 				// High quality = true seems to decrease image quality?
-				_rasterData.Compress(false);
+				RasterData.Compress(false);
 			}
 
-			MeshRenderer.material.mainTexture = _rasterData;
+			MeshRenderer.material.mainTexture = RasterData;
 			RasterDataState = TilePropertyState.Finished;
 			OnRasterDataChanged(this);
-
 
 			if (HeightDataState != TilePropertyState.Fetching || HeightDataState != TilePropertyState.Processing)
 			{
@@ -273,25 +222,41 @@ namespace Mapbox.Unity.MeshGeneration.Data
 		{
 			MeshRenderer.material.mainTexture = texture;
 		}
-
-
-
-		public Texture2D GetRasterData()
-		{
-			return _rasterData;
-		}
-
+		
 		internal void AddTile(Tile tile)
 		{
 			_tiles.Add(tile);
 		}
 
+		#region Cancel/Recycle/Destroy
 		public void Cancel()
 		{
 			for (int i = 0, _tilesCount = _tiles.Count; i < _tilesCount; i++)
 			{
 				_tiles[i].Cancel();
 			}
+		}
+
+		public void Recycle()
+		{
+			if (_loadingTexture && MeshRenderer != null)
+			{
+				MeshRenderer.material.mainTexture = _loadingTexture;
+			}
+
+			gameObject.SetActive(false);
+
+			// Reset internal state.
+			RasterDataState = TilePropertyState.None;
+			HeightDataState = TilePropertyState.None;
+			VectorDataState = TilePropertyState.None;
+
+			OnHeightDataChanged = delegate { };
+			OnRasterDataChanged = delegate { };
+			OnVectorDataChanged = delegate { };
+
+			Cancel();
+			_tiles.Clear();
 		}
 
 		protected virtual void OnDestroy()
@@ -301,10 +266,18 @@ namespace Mapbox.Unity.MeshGeneration.Data
 			{
 				Destroy(_heightTexture);
 			}
-			if (_rasterData != null)
+			if (RasterData != null)
 			{
-				Destroy(_rasterData);
+				Destroy(RasterData);
 			}
 		}
+		#endregion
+
+		#region Events
+		public event Action<UnityTile> OnHeightDataChanged = delegate { };
+		public event Action<UnityTile> OnRasterDataChanged = delegate { };
+		public event Action<UnityTile> OnVectorDataChanged = delegate { };
+		public event Action<UnityTile> OnReadyForMeshGeneration = delegate { };
+		#endregion
 	}
 }
