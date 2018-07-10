@@ -12,17 +12,13 @@ namespace Mapbox.Unity.MeshGeneration.Data
 	public class UnityTile : MonoBehaviour
 	{
 		[SerializeField]
-		Texture2D _rasterData;
+		private Texture2D _rasterData;
+		private float[] _heightData;
+		private Texture2D _heightTexture;
+		private Texture2D _loadingTexture;
 
-		float[] _heightData;
-
-		float _relativeScale;
-
-		Texture2D _heightTexture;
-
-		Texture2D _loadingTexture;
-
-		List<Tile> _tiles = new List<Tile>();
+		private float _relativeScale;
+		private List<Tile> _tiles = new List<Tile>();
 
 		MeshRenderer _meshRenderer;
 		public MeshRenderer MeshRenderer
@@ -64,8 +60,8 @@ namespace Mapbox.Unity.MeshGeneration.Data
 		}
 
 		// TODO: should this be a string???
-		string _vectorData;
-		public string VectorData
+		VectorTile _vectorData;
+		public VectorTile VectorData
 		{
 			get { return _vectorData; }
 			set
@@ -74,6 +70,7 @@ namespace Mapbox.Unity.MeshGeneration.Data
 				OnVectorDataChanged(this);
 			}
 		}
+
 		RectD _rect;
 		public RectD Rect
 		{
@@ -108,10 +105,25 @@ namespace Mapbox.Unity.MeshGeneration.Data
 		public TilePropertyState RasterDataState;
 		public TilePropertyState HeightDataState;
 		public TilePropertyState VectorDataState;
+		public bool IsReadyForVectorMeshGeneration;
 
 		public event Action<UnityTile> OnHeightDataChanged = delegate { };
 		public event Action<UnityTile> OnRasterDataChanged = delegate { };
 		public event Action<UnityTile> OnVectorDataChanged = delegate { };
+		public event Action<UnityTile> OnReadyForMeshGeneration = delegate { };
+
+		private void UpdateVectorReadyState(UnityTile tile)
+		{
+			if (RasterDataState != TilePropertyState.Fetching && RasterDataState != TilePropertyState.Processing &&
+				HeightDataState != TilePropertyState.Fetching && HeightDataState != TilePropertyState.Processing)
+			{
+				if (!IsReadyForVectorMeshGeneration)
+				{
+					IsReadyForVectorMeshGeneration = true;
+					OnReadyForMeshGeneration(tile);
+				}
+			}
+		}
 
 		private bool _isInitialized = false;
 
@@ -134,9 +146,12 @@ namespace Mapbox.Unity.MeshGeneration.Data
 			scaleFactor = Mathf.Pow(2, (map.InitialZoom - zoom));
 			gameObject.transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
 			gameObject.SetActive(true);
+
+			OnHeightDataChanged += UpdateVectorReadyState;
+			OnRasterDataChanged += UpdateVectorReadyState;
 		}
 
-		internal void Recycle()
+		public void Recycle()
 		{
 			if (_loadingTexture && MeshRenderer != null)
 			{
@@ -158,7 +173,8 @@ namespace Mapbox.Unity.MeshGeneration.Data
 			_tiles.Clear();
 		}
 
-		internal void SetHeightData(byte[] data, float heightMultiplier = 1f, bool useRelative = false)
+		#region SetTileData
+		public void SetHeightData(byte[] data, float heightMultiplier = 1f, bool useRelative = false)
 		{
 			// HACK: compute height values for terrain. We could probably do this without a texture2d.
 			if (_heightTexture == null)
@@ -189,25 +205,19 @@ namespace Mapbox.Unity.MeshGeneration.Data
 				}
 			}
 
-			HeightDataState = TilePropertyState.Loaded;
+			HeightDataState = TilePropertyState.Finished;
 			OnHeightDataChanged(this);
-		}
 
-		public float QueryHeightData(float x, float y)
-		{
-			if (_heightData != null)
+			if (RasterDataState != TilePropertyState.Fetching || RasterDataState != TilePropertyState.Processing)
 			{
-				var intX = (int)Mathf.Clamp(x * 256, 0, 255);
-				var intY = (int)Mathf.Clamp(y * 256, 0, 255);
-				return _heightData[intY * 256 + intX] * TileScale;
+
+				IsReadyForVectorMeshGeneration = true;
 			}
 
-			return 0;
-		}
-
-		public void SetLoadingTexture(Texture2D texture)
-		{
-			MeshRenderer.material.mainTexture = texture;
+			if (_rasterData != null)
+			{
+				MeshRenderer.material.mainTexture = _rasterData;
+			}
 		}
 
 		public void SetRasterData(byte[] data, bool useMipMap, bool useCompression)
@@ -231,9 +241,40 @@ namespace Mapbox.Unity.MeshGeneration.Data
 			}
 
 			MeshRenderer.material.mainTexture = _rasterData;
-			RasterDataState = TilePropertyState.Loaded;
+			RasterDataState = TilePropertyState.Finished;
 			OnRasterDataChanged(this);
+
+
+			if (HeightDataState != TilePropertyState.Fetching || HeightDataState != TilePropertyState.Processing)
+			{
+				IsReadyForVectorMeshGeneration = true;
+			}
 		}
+
+		public void SetVectorData(VectorTile vectorTile)
+		{
+			VectorData = vectorTile;
+		}
+		#endregion
+
+		public float QueryHeightData(float x, float y)
+		{
+			if (_heightData != null)
+			{
+				var intX = (int)Mathf.Clamp(x * 256, 0, 255);
+				var intY = (int)Mathf.Clamp(y * 256, 0, 255);
+				return _heightData[intY * 256 + intX] * TileScale;
+			}
+
+			return 0;
+		}
+
+		public void SetLoadingTexture(Texture2D texture)
+		{
+			MeshRenderer.material.mainTexture = texture;
+		}
+
+
 
 		public Texture2D GetRasterData()
 		{

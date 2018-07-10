@@ -56,7 +56,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 			{
 				_tilesWaitingResponse.Remove(tile);
 				tile.SetRasterData(rasterTile.Data, _properties.rasterOptions.useMipMap, _properties.rasterOptions.useCompression);
-				tile.RasterDataState = TilePropertyState.Loaded;
+				tile.RasterDataState = TilePropertyState.Finished;
 			}
 		}
 
@@ -102,7 +102,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 				for (int i = 0; i < Math.Min(_tilesToFetch.Count, 5); i++)
 				{
 					var tile = _tilesToFetch.Dequeue();
-					tile.RasterDataState = TilePropertyState.Loading;
+					tile.RasterDataState = TilePropertyState.Fetching;
 					_tilesWaitingResponse.Add(tile);
 					DataFetcher.FetchImage(tile.CanonicalTileId, MapId, tile, _properties.rasterOptions.useRetina);
 				}

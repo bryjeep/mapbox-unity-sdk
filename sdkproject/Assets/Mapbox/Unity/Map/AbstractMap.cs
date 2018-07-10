@@ -564,7 +564,7 @@ namespace Mapbox.Unity.Map
 			{
 				_worldHeightFixed = true;
 				var tile = _mapVisualizer.LoadTile(tileId);
-				if (tile.HeightDataState == MeshGeneration.Enums.TilePropertyState.Loaded)
+				if (tile.HeightDataState == MeshGeneration.Enums.TilePropertyState.Finished)
 				{
 					var h = tile.QueryHeightData(.5f, .5f);
 					Root.transform.position = new Vector3(

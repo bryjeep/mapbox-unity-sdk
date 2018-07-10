@@ -57,7 +57,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 					var tile = _tilesToFetch.Dequeue();
 					if (Strategy is IElevationBasedTerrainStrategy)
 					{
-						tile.HeightDataState = TilePropertyState.Loading;
+						tile.HeightDataState = TilePropertyState.Fetching;
 						_tilesWaitingResponse.Add(tile);
 						DataFetcher.FetchTerrain(tile.CanonicalTileId, _elevationOptions.sourceOptions.Id, tile);
 					}
