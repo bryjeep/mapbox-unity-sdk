@@ -107,26 +107,26 @@
 			_properties = (VectorLayerProperties)options;
 		}
 
+		//tiles are registered in first frame. Tile is added to a list and factory is flagged in tile (add factory call)
+		//starting from next frame, tiles start to get processed so factory knows all workload and tile knows which factories he's waiting for
 		protected override void OnRegistered(UnityTile tile)
 		{
 			if (string.IsNullOrEmpty(MapId) || _properties.sourceOptions.isActive == false || (_properties.vectorSubLayers.Count + _properties.locationPrefabList.Count) == 0)
 			{
-				
+				return;
 			}
-			else
-			{
-				_tilesToFetch.Enqueue(tile);
-			}
+
+			tile.AddFactory(this); //starting tracking as soon as it's registered.
+			_tilesToFetch.Enqueue(tile);
 		}
 
 		protected override void OnMapUpdate()
 		{
-			if(_tilesToFetch.Count > 0 && _tilesWaitingResponse.Count < _maximumConcurrentRequestCount)
+			if (_tilesToFetch.Count > 0 && _tilesWaitingResponse.Count < _maximumConcurrentRequestCount)
 			{
 				for (int i = 0; i < Math.Min(_tilesToFetch.Count, 5); i++)
 				{
 					var tile = _tilesToFetch.Dequeue();
-					tile.VectorDataState = TilePropertyState.Fetching;
 					_tilesWaitingResponse.Add(tile);
 					DataFetcher.FetchVector(tile.CanonicalTileId, MapId, tile, _properties.useOptimizedStyle, _properties.optimizedStyle);
 				}
@@ -144,6 +144,7 @@
 
 		protected override void OnUnregistered(UnityTile tile)
 		{
+			tile.OnReadyForMeshGeneration -= CreateMeshes;
 			if (_layerBuilder != null)
 			{
 				foreach (var layer in _layerBuilder.Values)
@@ -170,32 +171,30 @@
 			}
 			else
 			{
-				tile.OnReadyForMeshGeneration += (t) => { CreateMeshes(t); };
+				tile.OnReadyForMeshGeneration += CreateMeshes;
 			}
 		}
 
-		private void OnDataError(UnityTile tile, TileErrorEventArgs e)
+		private void OnDataError(UnityTile tile, VectorTile vectorTile, TileErrorEventArgs e)
 		{
 			if (tile != null)
 			{
 				_tilesWaitingResponse.Remove(tile);
-				tile.VectorDataState = TilePropertyState.Error;
+				//tile.VectorDataState = TilePropertyState.Error;
+				tile.RemoveFactory(this);
 				tile.SetVectorData(null);
+				Debug.Log(e.TileId);
 			}
 		}
 
 		#endregion
-		
+
 		/// <summary>
 		/// Fetches the vector data and passes each layer to relevant layer visualizers
 		/// </summary>
 		/// <param name="tile"></param>
 		private void CreateMeshes(UnityTile tile)
 		{
-			tile.VectorDataState = TilePropertyState.Processing;
-
-			// TODO: move unitytile state registrations to layer visualizers. Not everyone is interested in this data
-			// and we should not wait for it here!
 			foreach (var layerName in tile.VectorData.Data.LayerNames())
 			{
 				if (_layerBuilder.ContainsKey(layerName))
@@ -204,14 +203,14 @@
 					{
 						if (builder.Active)
 						{
-							if(_layerProgress.ContainsKey(tile))
+							if (_layerProgress.ContainsKey(tile))
 							{
 								_layerProgress[tile]++;
 							}
 							else
 							{
 								_layerProgress.Add(tile, 1);
-								if(!_tilesWaitingProcessing.Contains(tile))
+								if (!_tilesWaitingProcessing.Contains(tile))
 								{
 									_tilesWaitingProcessing.Add(tile);
 								}
@@ -248,16 +247,18 @@
 				}
 			}
 
-			tile.VectorDataState = TilePropertyState.Finished;
+			//tile.VectorDataState = TilePropertyState.Finished;
 		}
 
 		private void DecreaseProgressCounter(UnityTile tile)
 		{
 			_layerProgress[tile]--;
-			if(_layerProgress[tile] == 0)
+			if (_layerProgress[tile] == 0)
 			{
+				tile.RemoveFactory(this);
 				_layerProgress.Remove(tile);
 				_tilesWaitingProcessing.Remove(tile);
+				//tile.VectorDataState = TilePropertyState.Finished;
 			}
 		}
 	}

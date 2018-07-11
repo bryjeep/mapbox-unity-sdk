@@ -45,6 +45,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 
 		protected override void OnRegistered(UnityTile tile)
 		{
+			tile.AddFactory(this);
 			_tilesToFetch.Enqueue(tile);
 		}
 
@@ -55,15 +56,17 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 				for (int i = 0; i < Math.Min(_tilesToFetch.Count, 5); i++)
 				{
 					var tile = _tilesToFetch.Dequeue();
+					
 					if (Strategy is IElevationBasedTerrainStrategy)
 					{
-						tile.HeightDataState = TilePropertyState.Fetching;
 						_tilesWaitingResponse.Add(tile);
 						DataFetcher.FetchTerrain(tile.CanonicalTileId, _elevationOptions.sourceOptions.Id, tile);
+						//we're not calling tile.RemoveFactory here as we're not done with the tile yet
 					}
 					else
 					{
 						Strategy.RegisterTile(tile);
+						tile.RemoveFactory(this); //we're removing here because if it's flat, process is done here
 					}
 				}
 			}
@@ -83,17 +86,17 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 				_tilesWaitingResponse.Remove(tile);
 				tile.SetHeightData(pngRasterTile.Data, _elevationOptions.requiredOptions.exaggerationFactor, _elevationOptions.modificationOptions.useRelativeHeight);
 				Strategy.RegisterTile(tile);
+				tile.RemoveFactory(this);
 			}
 		}
 
-		private void OnDataError(UnityTile tile, TileErrorEventArgs e)
+		private void OnDataError(UnityTile tile, RawPngRasterTile rawTile, TileErrorEventArgs e)
 		{
 			if (tile != null)
 			{
 				_tilesWaitingResponse.Remove(tile);
-				tile.HeightDataState = TilePropertyState.Error;
-				//strategy might want to act on this , i.e. flattening tile mesh on data fetching failed?
 				Strategy.DataErrorOccurred(tile, e);
+				tile.RemoveFactory(this);
 			}
 		}
 		#endregion

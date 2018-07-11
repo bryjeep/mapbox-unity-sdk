@@ -19,17 +19,21 @@ public class DataFetcher : ScriptableObject
 public class TerrainDataFetcher : DataFetcher
 {
 	public Action<UnityTile, RawPngRasterTile> DataRecieved = (t, s) => { };
-	public Action<UnityTile, TileErrorEventArgs> FetchingError = (t, s) => { };
+	public Action<UnityTile, RawPngRasterTile, TileErrorEventArgs> FetchingError = (t, r, s) => { };
 
 	//tile here should be totally optional and used only not to have keep a dictionary in terrain factory base
 	public void FetchTerrain(CanonicalTileId canonicalTileId, string mapid, UnityTile tile = null)
 	{
 		var pngRasterTile = new RawPngRasterTile();
+		if (tile != null)
+		{
+			tile.AttachTile(pngRasterTile);
+		}
 		pngRasterTile.Initialize(_fileSource, canonicalTileId, mapid, () =>
 		{
 			if (pngRasterTile.HasError)
 			{
-				FetchingError(tile, new TileErrorEventArgs(canonicalTileId, pngRasterTile.GetType(), null, pngRasterTile.Exceptions));
+				FetchingError(tile, pngRasterTile , new TileErrorEventArgs(canonicalTileId, pngRasterTile.GetType(), null, pngRasterTile.Exceptions));
 			}
 			else
 			{

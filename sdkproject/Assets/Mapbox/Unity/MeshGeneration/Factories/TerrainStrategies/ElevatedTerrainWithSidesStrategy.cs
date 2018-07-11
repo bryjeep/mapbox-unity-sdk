@@ -45,15 +45,15 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 				tile.gameObject.layer = _elevationOptions.unityLayerOptions.layerId;
 			}
 
-			if (tile.MeshRenderer == null)
-			{
-				var renderer = tile.gameObject.AddComponent<MeshRenderer>();
-				renderer.materials = new Material[2]
-				{
-					_elevationOptions.requiredOptions.baseMaterial,
-					_elevationOptions.sideWallOptions.wallMaterial
-				};
-			}
+			//if (tile.MeshRenderer == null)
+			//{
+			//	var renderer = tile.gameObject.AddComponent<MeshRenderer>();
+			//	renderer.materials = new Material[2]
+			//	{
+			//		_elevationOptions.requiredOptions.baseMaterial,
+			//		_elevationOptions.sideWallOptions.wallMaterial
+			//	};
+			//}
 
 			if (tile.MeshFilter == null)
 			{

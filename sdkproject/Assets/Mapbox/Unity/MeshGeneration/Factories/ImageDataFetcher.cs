@@ -4,7 +4,7 @@ using System;
 public class ImageDataFetcher : DataFetcher
 {
 	public Action<UnityTile, RasterTile> DataRecieved = (t, s) => { };
-	public Action<UnityTile, TileErrorEventArgs> FetchingError = (t, s) => { };
+	public Action<UnityTile, RasterTile, TileErrorEventArgs> FetchingError = (t, r, s) => { };
 
 	//tile here should be totally optional and used only not to have keep a dictionary in terrain factory base
 	public void FetchImage(CanonicalTileId canonicalTileId, string mapid, UnityTile tile = null, bool useRetina = false)
@@ -21,14 +21,13 @@ public class ImageDataFetcher : DataFetcher
 
 		if (tile != null)
 		{
-			tile.AddTile(rasterTile);
+			tile.AttachTile(rasterTile);
 		}
-
 		rasterTile.Initialize(_fileSource, tile.CanonicalTileId, mapid, () =>
 		{
 			if (rasterTile.HasError)
 			{
-				FetchingError(tile, new TileErrorEventArgs(tile.CanonicalTileId, rasterTile.GetType(), tile, rasterTile.Exceptions));
+				FetchingError(tile, rasterTile, new TileErrorEventArgs(tile.CanonicalTileId, rasterTile.GetType(), tile, rasterTile.Exceptions));
 			}
 			else
 			{

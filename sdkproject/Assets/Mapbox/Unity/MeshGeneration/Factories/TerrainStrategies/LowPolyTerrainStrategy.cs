@@ -47,11 +47,11 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 				tile.gameObject.layer = _elevationOptions.unityLayerOptions.layerId;
 			}
 
-			if (tile.MeshRenderer == null)
-			{
-				var renderer = tile.gameObject.AddComponent<MeshRenderer>();
-				renderer.material = _elevationOptions.requiredOptions.baseMaterial;
-			}
+			//if (tile.MeshRenderer == null)
+			//{
+			//	var renderer = tile.gameObject.AddComponent<MeshRenderer>();
+			//	renderer.material = _elevationOptions.requiredOptions.baseMaterial;
+			//}
 
 			if (tile.MeshFilter == null)
 			{

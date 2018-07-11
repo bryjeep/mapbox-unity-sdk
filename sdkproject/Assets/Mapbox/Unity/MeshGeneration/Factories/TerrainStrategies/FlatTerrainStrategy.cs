@@ -22,23 +22,23 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 				tile.gameObject.layer = _elevationOptions.unityLayerOptions.layerId;
 			}
 
-			if (tile.MeshRenderer == null)
-			{
-				var renderer = tile.gameObject.AddComponent<MeshRenderer>();
+			//if (tile.MeshRenderer == null)
+			//{
+			//	var renderer = tile.gameObject.AddComponent<MeshRenderer>();
 
-				if (_elevationOptions.sideWallOptions.isActive)
-				{
-					renderer.materials = new Material[2]
-					{
-						_elevationOptions.requiredOptions.baseMaterial,
-						_elevationOptions.sideWallOptions.wallMaterial
-					};
-				}
-				else
-				{
-					renderer.material = _elevationOptions.requiredOptions.baseMaterial;
-				}
-			}
+			//	if (_elevationOptions.sideWallOptions.isActive)
+			//	{
+			//		renderer.materials = new Material[2]
+			//		{
+			//			_elevationOptions.requiredOptions.baseMaterial,
+			//			_elevationOptions.sideWallOptions.wallMaterial
+			//		};
+			//	}
+			//	else
+			//	{
+			//		renderer.material = _elevationOptions.requiredOptions.baseMaterial;
+			//	}
+			//}
 
 			if (tile.MeshFilter == null)
 			{

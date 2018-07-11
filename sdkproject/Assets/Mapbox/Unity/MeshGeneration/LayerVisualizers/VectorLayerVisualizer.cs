@@ -530,7 +530,7 @@
 		public override void OnUnregisterTile(UnityTile tile)
 		{
 			base.OnUnregisterTile(tile);
-			tile.VectorDataState = Enums.TilePropertyState.Cancelled;
+			//tile.VectorDataState = Enums.TilePropertyState.Cancelled;
 			if (_activeCoroutines.ContainsKey(tile))
 			{
 				foreach (var cor in _activeCoroutines[tile])
