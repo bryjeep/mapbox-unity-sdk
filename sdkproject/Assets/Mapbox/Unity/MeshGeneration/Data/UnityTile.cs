@@ -14,21 +14,14 @@ namespace Mapbox.Unity.MeshGeneration.Data
 	{
 		[SerializeField]
 		public Texture2D RasterData;
+		public VectorTile VectorData;
 		private Texture2D _heightTexture;
 		private float[] _heightData;
-		private VectorTile _vectorData;
-		public VectorTile VectorData
-		{
-			get { return _vectorData; }
-			set
-			{
-				_vectorData = value;
-				OnVectorDataChanged(this);
-			}
-		}
 
 		private Texture2D _loadingTexture;
+		//keeping track of tile objects to be able to cancel them safely if tile is destroyed before data fetching finishes
 		private List<Tile> _tiles = new List<Tile>();
+		//keeping track of factories to know when tile is finished or ready for meshgen
 		private HashSet<AbstractTileFactory> _workingFactories = new HashSet<AbstractTileFactory>();
 
 		#region CachedUnityComponents
@@ -52,7 +45,7 @@ namespace Mapbox.Unity.MeshGeneration.Data
 			{
 				if (_meshFilter == null)
 				{
-					_meshFilter = GetComponent<MeshFilter>();
+					_meshFilter = gameObject.AddComponent<MeshFilter>();
 				}
 				return _meshFilter;
 			}
@@ -114,7 +107,7 @@ namespace Mapbox.Unity.MeshGeneration.Data
 		}
 
 		#region SetTileData
-		public void SetHeightData(byte[] data, float heightMultiplier = 1f, bool useRelative = false)
+		public void SetHeightData(byte[] data, float heightMultiplier = 1f, bool useRelative = false, bool addCollider = false)
 		{
 			// HACK: compute height values for terrain. We could probably do this without a texture2d.
 			if (_heightTexture == null)
@@ -143,6 +136,11 @@ namespace Mapbox.Unity.MeshGeneration.Data
 					float b = rgbData[(xx * 256 + yy) * 4 + 3];
 					_heightData[xx * 256 + yy] = relativeScale * heightMultiplier * Conversions.GetAbsoluteHeightFromColor(r, g, b);
 				}
+			}
+
+			if (addCollider && Collider == null)
+			{
+				gameObject.AddComponent<MeshCollider>();
 			}
 
 			_heightDataState = TilePropertyState.Finished;
@@ -182,6 +180,11 @@ namespace Mapbox.Unity.MeshGeneration.Data
 		}
 		#endregion
 
+		#region GetTileData
+		//keeping image and vector data is just regular public fields, not to add unnecessary method call overhead
+		//shouldn't be set from outside though. might change to private set props just to prevent that
+
+		//getting height data by single point queries. do we need anything different?
 		public float QueryHeightData(float x, float y)
 		{
 			if (_heightData != null)
@@ -193,7 +196,8 @@ namespace Mapbox.Unity.MeshGeneration.Data
 
 			return 0;
 		}
-
+		#endregion
+		
 		public void SetLoadingTexture(Texture2D texture)
 		{
 			MeshRenderer.material.mainTexture = texture;
@@ -203,76 +207,6 @@ namespace Mapbox.Unity.MeshGeneration.Data
 		{
 			_tiles.Add(tile);
 		}
-
-		//public void RemoveTile(int v, Tile tile)
-		//{
-		//	_tiles.Remove(v);
-
-		//	if (tile is RawPngRasterTile)
-		//	{
-		//		if (tile.HasError)
-		//		{
-		//			_heightDataState = TilePropertyState.Error;
-		//		}
-		//		else if (tile.CurrentState == Tile.State.Canceled)
-		//		{
-		//			_heightDataState = TilePropertyState.Cancelled;
-		//		}
-		//		else
-		//		{
-		//			//assuming just one height data call per tile
-		//			_heightDataState = TilePropertyState.Finished;
-		//		}
-		//	}
-		//	else if(tile is RasterTile)
-		//	{
-		//		if (tile.HasError)
-		//		{
-		//			_rasterDataState = TilePropertyState.Error;
-		//		}
-		//		else if (tile.CurrentState == Tile.State.Canceled)
-		//		{
-		//			_rasterDataState = TilePropertyState.Cancelled;
-		//		}
-		//		else
-		//		{
-		//			//assuming just one raster data call per tile
-		//			_rasterDataState = TilePropertyState.Finished;
-		//		}
-		//	}
-		//	else if(tile is VectorTile)
-		//	{
-		//		if (tile.HasError)
-		//		{
-		//			_vectorDataState = TilePropertyState.Error;
-		//		}
-		//		else if (tile.CurrentState == Tile.State.Canceled)
-		//		{
-		//			_vectorDataState = TilePropertyState.Cancelled;
-		//		}
-		//		else
-		//		{
-		//			//assuming just one vector data call per tile
-		//			_vectorDataState = TilePropertyState.Finished;
-		//		}
-		//	}
-
-		//	var readForVector = true;
-		//	foreach (var item in _tiles)
-		//	{
-		//		if (item.Value is RasterTile)
-		//		{
-		//			readForVector = false;
-		//			break;
-		//		}
-		//	}
-		//	IsReadyForVectorMeshGeneration = readForVector;
-
-		//	if(_tiles.Count == 0)
-		//	{
-		//		OnTileFinished(this);
-		//	}
-		//}
 
 		public void AddFactory(AbstractTileFactory factory)
 		{
@@ -324,8 +258,7 @@ namespace Mapbox.Unity.MeshGeneration.Data
 				OnTileFinished(this);
 			}
 		}
-
-
+		
 		#region Cancel/Recycle/Destroy
 		public void Cancel()
 		{

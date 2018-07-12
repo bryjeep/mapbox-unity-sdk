@@ -81,10 +81,11 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 		#region DataFetcherEvents
 		private void OnTerrainRecieved(UnityTile tile, RawPngRasterTile pngRasterTile)
 		{
+			
 			if (tile != null)
 			{
 				_tilesWaitingResponse.Remove(tile);
-				tile.SetHeightData(pngRasterTile.Data, _elevationOptions.requiredOptions.exaggerationFactor, _elevationOptions.modificationOptions.useRelativeHeight);
+				tile.SetHeightData(pngRasterTile.Data, _elevationOptions.requiredOptions.exaggerationFactor, _elevationOptions.modificationOptions.useRelativeHeight, _elevationOptions.requiredOptions.addCollider);
 				Strategy.RegisterTile(tile);
 				tile.RemoveFactory(this);
 			}
