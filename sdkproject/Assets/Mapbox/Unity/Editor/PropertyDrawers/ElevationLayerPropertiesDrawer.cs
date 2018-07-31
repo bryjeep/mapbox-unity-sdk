@@ -104,14 +104,17 @@
 			EditorGUILayout.PropertyField(elevationLayerType, new GUIContent { text = elevationLayerType.displayName, tooltip = ((ElevationLayerType)elevationLayerType.enumValueIndex).Description() });
 
 			terrainProp.ElevationLayerType = (ElevationLayerType)elevationLayerType.enumValueIndex;
-
+			//terrainProp.
 			position.y += lineHeight;
 			if (sourceTypeValue == ElevationSourceType.None)
 			{
 				GUI.enabled = true;
 			}
+			var requiredOptions = property.FindPropertyRelative("requiredOptions");
 
-			EditorGUILayout.PropertyField(property.FindPropertyRelative("requiredOptions"), true);
+			//ElevationRequiredOptions
+			EditorGUILayout.PropertyField(requiredOptions, true);
+			terrainProp.ElevationRequiredOptions = requiredOptions;
 			//position.y += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("requiredOptions"));
 			ShowPosition = EditorGUILayout.Foldout(ShowPosition, "Others");
 			if (ShowPosition)

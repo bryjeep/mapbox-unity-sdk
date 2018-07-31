@@ -331,6 +331,11 @@ namespace Mapbox.Unity.Map
 		public event Action OnImageLayerRedrawn = delegate { };
 		public event Action OnTerrainLayerRedrawn = delegate { };
 
+		public void TestEvent()
+		{
+			Debug.Log("TestEvent");
+		}
+
 		protected virtual void Awake()
 		{
 			// Setup a visualizer to get a "Starter" map.

@@ -13,6 +13,7 @@
 
 		private void NotifyPropertyChanged(String propertyName = "")
 		{
+			UnityEngine.Debug.Log(propertyName);
 			if (PropertyChanged != null)
 			{
 				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
@@ -27,25 +28,43 @@
 			},
 			isActive = true
 		};
+
+		private void OnElevationRequiredOptionsChanged()
+		{
+			NotifyPropertyChanged("OnElevationRequiredOptionsChanged");
+		}
+
 		public ElevationLayerType elevationLayerType = ElevationLayerType.FlatTerrain;
-		public ElevationRequiredOptions requiredOptions = new ElevationRequiredOptions();
+		public ElevationRequiredOptions requiredOptions = new ElevationRequiredOptions(OnElevationRequiredOptionsChanged);
+		//{
+		//	PropertyChanged += OnElevationRequiredOptionsChanged;
+		//};
 		public ElevationModificationOptions modificationOptions = new ElevationModificationOptions();
 		public UnityLayerOptions unityLayerOptions = new UnityLayerOptions();
 		public TerrainSideWallOptions sideWallOptions = new TerrainSideWallOptions();
 
+		//requiredOptions.
+
 		public ElevationLayerType ElevationLayerType
 		{
-			get
-			{
-				return elevationLayerType;
-			}
 			set
 			{
-
 				if (value != this.elevationLayerType)
 				{
 					this.elevationLayerType = value;
 					NotifyPropertyChanged("ElevationLayerType");
+				}
+			}
+		}
+
+		public ElevationRequiredOptions ElevationRequiredOptions
+		{
+			set
+			{
+				if (value != this.requiredOptions)
+				{
+					this.requiredOptions = value;
+					NotifyPropertyChanged("ElevationRequiredOptions");
 				}
 			}
 		}
