@@ -9,7 +9,7 @@
 	using Mapbox.Unity.Utilities;
 	using Mapbox.VectorTile.Geometry;
 	using Mapbox.Unity.MeshGeneration.Interfaces;
-
+	using Mapbox.Map;
 
 
 	/// <summary>
@@ -28,6 +28,8 @@
 		public bool alwaysSpawnPrefab;
 		private List<GameObject> _prefabList = new List<GameObject>();
 
+		private List<string> _explicitSpawnFeatureIds;
+
 		[SerializeField]
 		[Geocode]
 		private List<string> _prefabLocations;
@@ -36,6 +38,13 @@
 		private List<string> _explicitlyBlockedFeatureIds;
 		//maximum distance to trigger feature replacement ( in tile space )
 		private const float _maxDistanceToBlockFeature_tilespace = 1000f;
+
+		//maximum distance to trigger feature spawn ( in tile space )
+		private const float _maxDistanceToSpawnFeature_tilespace = 100f;
+
+		private double _blockFeatureDist;
+		private double _spawnFeatureDist;
+
 
 		/// <summary>
 		/// List of featureIds to test against. 
@@ -72,6 +81,8 @@
 		public override void Initialize()
 		{
 			base.Initialize();
+			_blockFeatureDist = Math.Pow(_maxDistanceToBlockFeature_tilespace, 2f);
+			_spawnFeatureDist = Math.Pow(_maxDistanceToSpawnFeature_tilespace, 2f);
 			//duplicate the list of lat/lons to track which coordinates have already been spawned
 			_latLonToSpawn = new List<string>(_prefabLocations);
 			_featureId = new List<List<string>>();
@@ -84,7 +95,7 @@
 				_objects = new Dictionary<ulong, GameObject>();
 				_poolGameObject = new GameObject("_inactive_prefabs_pool");
 			}
-			//_latLonToSpawn = new List<string>(_prefabLocations);
+			_explicitSpawnFeatureIds = new List<string>();
 		}
 
 		public override void SetProperties(ModifierProperties properties)
@@ -106,7 +117,9 @@
 						_featureId[index] = (_featureId[index] == null) ? new List<string>() : _featureId[index];
 						_tempFeatureId = feature.Data.Id.ToString();
 						//need to check if len is greater than 3 before stripping string
-						_featureId[index].Add(_tempFeatureId.Substring(0, _tempFeatureId.Length - 3));
+						string idCandidate = (_tempFeatureId.Length <= 3) ? _tempFeatureId : _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
+						Debug.Log(idCandidate);
+						_featureId[index].Add(idCandidate);
 					}
 				}
 				catch (Exception e)
@@ -134,6 +147,18 @@
 					{
 						foreach (var featureId in _featureId[index])
 						{
+							Vector2d vector2D = Conversions.StringToLatLon(point);
+							string featureTileId = Conversions.LatitudeLongitudeToTileId(vector2D.x, vector2D.y, feature.Tile.InitialZoom).ToString();
+
+							var from = Conversions.LatitudeLongitudeToVectorTilePosition(vector2D, feature.Tile.InitialZoom);
+							var to = feature.Data.Geometry<float>()[0][0];
+							float distance = Vector2.SqrMagnitude(new Vector2(from.x, from.y) - new Vector2(to.X, to.Y));
+
+							if(distance < _spawnFeatureDist)
+							{
+								_explicitSpawnFeatureIds.Add(feature.Data.Id.ToString());
+							}
+
 							//preventing spawning of explicitly blocked features
 							foreach (var blockedId in _explicitlyBlockedFeatureIds)
 							{
@@ -143,9 +168,7 @@
 								}
 							}
 
-							var from = Conversions.LatitudeLongitudeToVectorTilePosition(Conversions.StringToLatLon(point), feature.Tile.InitialZoom);
-							var to = feature.Data.Geometry<float>()[0][0];
-							if( Vector2.SqrMagnitude( new Vector2(from.x, from.y) - new Vector2(to.X, to.Y)) > Math.Pow(_maxDistanceToBlockFeature_tilespace, 2f))
+							if( distance > _blockFeatureDist)
 							{
 								return false;
 							}
@@ -193,7 +216,7 @@
 				_objects.Add(featureId, go);
 				go.transform.SetParent(ve.GameObject.transform, false);
 			}
-
+			Debug.Log("SPAWNING " + go.name);
 			PositionScaleRectTransform(ve, tile, go);
 
 			if (_options.AllPrefabsInstatiated != null)
@@ -265,10 +288,13 @@
 					return true;
 				}
 			}
-			return alwaysSpawnPrefab;
-			//if some bool is true, return the bool value
-			//bool is 'always spawn regardless of replace features'
-			//return false;
+
+			if(_explicitSpawnFeatureIds.Contains(feature.Data.Id.ToString()))
+			{
+				return true;
+			}
+
+			return false;
 		}
 		public override void OnPoolItem(VectorEntity vectorEntity)
 		{
