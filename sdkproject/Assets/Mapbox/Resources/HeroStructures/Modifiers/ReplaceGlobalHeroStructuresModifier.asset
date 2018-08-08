@@ -12,7 +12,29 @@ MonoBehaviour:
   m_Name: ReplaceGlobalHeroStructuresModifier
   m_EditorClassIdentifier: 
   Active: 1
-  _replaceFeatureModifiers:
-  - {fileID: 11400000, guid: e8f257af9ed9047a4849f35b088e9018, type: 2}
-  - {fileID: 11400000, guid: a2e1bcfb2a40347779a8185312368521, type: 2}
-  - {fileID: 11400000, guid: fdd98fcce392b43349632ff3f9b3153c, type: 2}
+  featureBundleList:
+    features: []
+  features:
+  - active: 0
+    spawnPrefabOptions:
+      prefab: {fileID: 0}
+      scaleDownWithWorld: 1
+    _prefabLocations:
+    - 
+    - 
+    - 
+    _explicitlyBlockedFeatureIds: []
+  - active: 0
+    spawnPrefabOptions:
+      prefab: {fileID: 0}
+      scaleDownWithWorld: 1
+    _prefabLocations:
+    - 
+    _explicitlyBlockedFeatureIds: []
+  - active: 0
+    spawnPrefabOptions:
+      prefab: {fileID: 0}
+      scaleDownWithWorld: 1
+    _prefabLocations:
+    - 
+    _explicitlyBlockedFeatureIds: []
