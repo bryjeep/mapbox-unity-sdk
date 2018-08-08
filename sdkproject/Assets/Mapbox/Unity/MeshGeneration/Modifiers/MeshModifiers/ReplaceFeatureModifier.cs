@@ -46,6 +46,8 @@
 		private double _spawnFeatureDist;
 
 
+		private Dictionary<string, List<string>> _spawnIds = new Dictionary<string, List<string>>();
+
 		/// <summary>
 		/// List of featureIds to test against. 
 		/// We need a list of featureIds per location. 
@@ -108,6 +110,12 @@
 			int index = -1;
 			foreach (var point in _prefabLocations)
 			{
+				Vector2d vector2D = Conversions.StringToLatLon(point);
+				string featureTileId = Conversions.LatitudeLongitudeToTileId(vector2D.x, vector2D.y, feature.Tile.InitialZoom).ToString();
+				if (!_spawnIds.ContainsKey(featureTileId))
+				{
+					_spawnIds.Add(featureTileId, new List<string>());
+				}
 				try
 				{
 					index++;
@@ -118,7 +126,6 @@
 						_tempFeatureId = feature.Data.Id.ToString();
 						//need to check if len is greater than 3 before stripping string
 						string idCandidate = (_tempFeatureId.Length <= 3) ? _tempFeatureId : _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
-						Debug.Log(idCandidate);
 						_featureId[index].Add(idCandidate);
 					}
 				}
@@ -140,6 +147,7 @@
 
 			foreach (var point in _prefabLocations)
 			{
+				
 				try
 				{
 					index++;
@@ -147,16 +155,17 @@
 					{
 						foreach (var featureId in _featureId[index])
 						{
-							Vector2d vector2D = Conversions.StringToLatLon(point);
-							string featureTileId = Conversions.LatitudeLongitudeToTileId(vector2D.x, vector2D.y, feature.Tile.InitialZoom).ToString();
+							
 
 							var from = Conversions.LatitudeLongitudeToVectorTilePosition(vector2D, feature.Tile.InitialZoom);
 							var to = feature.Data.Geometry<float>()[0][0];
 							float distance = Vector2.SqrMagnitude(new Vector2(from.x, from.y) - new Vector2(to.X, to.Y));
-
+			
 							if(distance < _spawnFeatureDist)
 							{
-								_explicitSpawnFeatureIds.Add(feature.Data.Id.ToString());
+								
+								_spawnIds[featureTileId].Add(feature.Data.Id.ToString());
+								//_explicitSpawnFeatureIds.Add(feature.Data.Id.ToString());
 							}
 
 							//preventing spawning of explicitly blocked features
@@ -216,7 +225,7 @@
 				_objects.Add(featureId, go);
 				go.transform.SetParent(ve.GameObject.transform, false);
 			}
-			Debug.Log("SPAWNING " + go.name);
+			Debug.Log("SPAWNING " + go.name, go);
 			PositionScaleRectTransform(ve, tile, go);
 
 			if (_options.AllPrefabsInstatiated != null)
@@ -288,14 +297,21 @@
 					return true;
 				}
 			}
-
-			if(_explicitSpawnFeatureIds.Contains(feature.Data.Id.ToString()))
+			string tileId = feature.Tile.UnwrappedTileId.ToString();
+			if(_spawnIds.ContainsKey(tileId))
 			{
-				return true;
+				List<string> ids = _spawnIds[tileId];
+
+				if (ids.Contains(feature.Data.Id.ToString()))
+				{
+					ids.Remove(feature.Data.Id.ToString());
+					return true;
+				}
 			}
 
 			return false;
 		}
+
 		public override void OnPoolItem(VectorEntity vectorEntity)
 		{
 			base.OnPoolItem(vectorEntity);
