@@ -33,7 +33,7 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 37.8024, -122.405833
-    explicitSpawnId: 
+    explicitSpawnId: 4513315311
     _explicitlyBlockedFeatureIds: []
   - Name: SalesForceTower
     active: 1
@@ -41,15 +41,16 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 37.7899, -122.3969
-    explicitSpawnId: 
-    _explicitlyBlockedFeatureIds: []
+    explicitSpawnId: 4319721861
+    _explicitlyBlockedFeatureIds:
+    - 4319721861
   - Name: EmpireStateBuilding
     active: 1
     prefab: {fileID: 1158024974015050, guid: f845fd35405547d4ca0a433a01c502c4, type: 2}
     scaleDownWithWorld: 1
     _prefabLocations:
     - 40.748333333333, -73.985277777778
-    explicitSpawnId: 
+    explicitSpawnId: 346338541
     _explicitlyBlockedFeatureIds:
     - 2659326181
   - Name: ChryslerBuilding
@@ -58,8 +59,70 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 40.751622, -73.975333
-    explicitSpawnId: 
-    _explicitlyBlockedFeatureIds: []
+    explicitSpawnId: 1966474161
+    _explicitlyBlockedFeatureIds:
+    - 1966474161
+    - 2609040721
+    - 2609041091
+    - 1966474231
+    - 2609041111
+    - 2609041121
+    - 2609041081
+    - 2609041101
+    - 2609040741
+    - 2609040691
+    - 2609141321
+    - 2609141101
+    - 2609141221
+    - 2609141041
+    - 2609141281
+    - 2609141311
+    - 2609141081
+    - 2609141211
+    - 2609141111
+    - 2609141301
+    - 2609141231
+    - 2609141061
+    - 2609141261
+    - 2609141091
+    - 2609141411
+    - 2609141331
+    - 2609141381
+    - 2609141271
+    - 2609141371
+    - 2609141291
+    - 2609141031
+    - 2609141351
+    - 2609141251
+    - 2609040791
+    - 2609141241
+    - 2609141201
+    - 2609141161
+    - 2609141151
+    - 2609141171
+    - 2609141431
+    - 2609141201
+    - 2609141431
+    - 2609141051
+    - 2609141141
+    - 2609141361
+    - 2609141181
+    - 2609141021
+    - 2609141341
+    - 2609141191
+    - 2609141121
+    - 2658694931
+    - 2610603121
+    - 2609041131
+    - 2609040731
+    - 2609041141
+    - 2609040681
+    - 2609040771
+    - 2609040911
+    - 2609040701
+    - 2609040781
+    - 2609040711
+    - 2609040751
   - Name: OneWorldTradeCenter
     active: 1
     prefab: {fileID: 1969484294415250, guid: 23006cc4ad4e90e47a00d5e992fa9c9e, type: 2}
