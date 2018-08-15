@@ -271,10 +271,7 @@
 			}
 			if(!string.IsNullOrEmpty(_explicitSpawnId))
 			{
-				if (feature.Data.Id.ToString() == _explicitSpawnId)
-				{
-					return true;
-				}
+				return feature.Data.Id.ToString() == _explicitSpawnId;
 			}
 
 			if (_objects.ContainsKey(feature.Data.Id))
