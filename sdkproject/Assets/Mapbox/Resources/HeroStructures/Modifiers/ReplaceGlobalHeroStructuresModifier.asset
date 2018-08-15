@@ -19,17 +19,21 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 37.795135, -122.402748
+    explicitSpawnId: 4513369021
     _explicitlyBlockedFeatureIds:
     - 1366159871
     - 4513368931
     - 4513368981
     - 4513368951
+    - 4513369021
+    - 4513369011
   - Name: CoitTower
     active: 1
     prefab: {fileID: 1557681104471738, guid: 2cb306508c053344ea5fbc519cdcff79, type: 2}
     scaleDownWithWorld: 1
     _prefabLocations:
     - 37.8024, -122.405833
+    explicitSpawnId: 
     _explicitlyBlockedFeatureIds: []
   - Name: SalesForceTower
     active: 1
@@ -37,6 +41,7 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 37.7899, -122.3969
+    explicitSpawnId: 
     _explicitlyBlockedFeatureIds: []
   - Name: EmpireStateBuilding
     active: 1
@@ -44,6 +49,7 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 40.748333333333, -73.985277777778
+    explicitSpawnId: 
     _explicitlyBlockedFeatureIds:
     - 2659326181
   - Name: ChryslerBuilding
@@ -52,6 +58,7 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 40.751622, -73.975333
+    explicitSpawnId: 
     _explicitlyBlockedFeatureIds: []
   - Name: OneWorldTradeCenter
     active: 1
@@ -59,6 +66,7 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 40.713, -74.0135
+    explicitSpawnId: 
     _explicitlyBlockedFeatureIds: []
   - Name: StatueofLiberty
     active: 1
@@ -66,6 +74,7 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 40.6892, -74.0445
+    explicitSpawnId: 
     _explicitlyBlockedFeatureIds: []
   - Name: GuggenheimMuseum
     active: 1
@@ -73,4 +82,5 @@ MonoBehaviour:
     scaleDownWithWorld: 1
     _prefabLocations:
     - 40.783056, -73.958889
+    explicitSpawnId: 
     _explicitlyBlockedFeatureIds: []
