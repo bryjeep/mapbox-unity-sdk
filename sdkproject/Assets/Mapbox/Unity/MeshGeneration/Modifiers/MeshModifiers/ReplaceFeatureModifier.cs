@@ -28,6 +28,9 @@
 		private List<GameObject> _prefabList = new List<GameObject>();
 
 		[SerializeField]
+		private string _explicitSpawnId;
+
+		[SerializeField]
 		[Geocode]
 		private List<string> _prefabLocations;
 
@@ -65,6 +68,14 @@
 			set
 			{
 				_explicitlyBlockedFeatureIds = value;
+			}
+		}
+
+		public string ExplicitSpawnId
+		{
+			set
+			{
+				_explicitSpawnId = value;
 			}
 		}
 
@@ -123,6 +134,15 @@
 		public bool ShouldReplaceFeature(VectorFeatureUnity feature)
 		{
 			int index = -1;
+
+			//preventing spawning of explicitly blocked features
+			foreach (var blockedId in _explicitlyBlockedFeatureIds)
+			{
+				if (feature.Data.Id.ToString() == blockedId)
+				{
+					return true;
+				}
+			}
 
 			foreach (var point in _prefabLocations)
 			{
@@ -248,6 +268,13 @@
 			if (feature == null)
 			{
 				return false;
+			}
+			if(!string.IsNullOrEmpty(_explicitSpawnId))
+			{
+				if (feature.Data.Id.ToString() == _explicitSpawnId)
+				{
+					return true;
+				}
 			}
 
 			if (_objects.ContainsKey(feature.Data.Id))

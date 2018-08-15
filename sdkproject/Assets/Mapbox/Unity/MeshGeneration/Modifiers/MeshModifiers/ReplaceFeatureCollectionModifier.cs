@@ -22,6 +22,8 @@
 		[Geocode]
 		public List<string> _prefabLocations = new List<string>();
 
+		public string explicitSpawnId;
+
 		public List<string> _explicitlyBlockedFeatureIds = new List<string>();
 
 	}
@@ -62,6 +64,12 @@
 				};
 				replaceFeatureModifier.PrefabLocations = new List<string>(feature._prefabLocations);
 				replaceFeatureModifier.BlockedIds = new List<string>(feature._explicitlyBlockedFeatureIds);
+
+				if(!string.IsNullOrEmpty(feature.explicitSpawnId))
+				{
+					replaceFeatureModifier.ExplicitSpawnId = feature.explicitSpawnId;
+				}
+
 				replaceFeatureModifier.Initialize();
 
 				_replaceFeatureModifiers.Add(replaceFeatureModifier);
