@@ -15,6 +15,7 @@
 		{
 			if (OnPropertyUpdated != null)
 			{
+				Debug.Log("ImageryLayerProperties - OnPropertyUpdated");
 				OnPropertyUpdated();
 			}
 		}

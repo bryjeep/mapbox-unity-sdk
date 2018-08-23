@@ -245,6 +245,7 @@ namespace Mapbox.Unity.Map
 		
 		public void RedrawLayer(AbstractTileFactory factory)
 		{
+			Debug.Log("Begin RedrawLayer");
 			if (!(factory is VectorTileFactory))
 			{
 				foreach (KeyValuePair<UnwrappedTileId, UnityTile> tileBundle in _activeTiles)
@@ -263,6 +264,7 @@ namespace Mapbox.Unity.Map
 					factory.Register(tileBundle.Value);
 				}
 			}
+			Debug.Log("End RedrawLayer");
 		}
 
 		protected abstract void PlaceTile(UnwrappedTileId tileId, UnityTile tile, IMapReadable map);

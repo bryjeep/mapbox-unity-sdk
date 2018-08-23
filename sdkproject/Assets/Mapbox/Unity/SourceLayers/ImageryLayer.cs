@@ -115,6 +115,8 @@
 
 		public void Refresh()
 		{
+			Debug.Log("Refresh");
+
 			Factory.SetOptions(_layerProperty);
 			NotifyUpdateLayer(_imageFactory);
 		}

@@ -480,9 +480,11 @@ namespace Mapbox.Unity.Map
 
 			_imagery.UpdateLayer += (factory, updateVector) =>
 			{
+				//ImageLayer.UpdateFactorySettings();
 				_mapVisualizer.RedrawLayer(factory);
 				if(updateVector)
 				{
+					Debug.Log("UpdateVector");
 					VectorData.UpdateFactorySettings();
 					_mapVisualizer.RedrawLayer(VectorData.Factory);
 				}

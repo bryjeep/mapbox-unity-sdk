@@ -1,6 +1,7 @@
 ﻿namespace Mapbox.Unity.Map
 {
 	using System;
+	using System.Collections;
 	using UnityEngine;
 	using Mapbox.Unity.MeshGeneration.Factories;
 	using Mapbox.Unity.Utilities;
@@ -134,7 +135,7 @@
 				//so we have to refresh that first
 				SetStrategy();
 				//pushing new settings to factory directly
-				Factory.SetOptions(_layerProperty);
+				_elevationFactory.SetOptions(_layerProperty);
 				//notifying map to reload existing tiles
 				NotifyUpdateLayer(_elevationFactory, true);
 			};
