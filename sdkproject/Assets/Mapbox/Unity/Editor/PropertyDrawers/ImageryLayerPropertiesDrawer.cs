@@ -51,11 +51,12 @@
 			var sourceTypeLabel = new GUIContent { text = "Data Source", tooltip = "Source tileset for Imagery." };
 
 			EditorGUI.BeginChangeCheck();
-			sourceTypeProperty.enumValueIndex = EditorGUILayout.Popup(sourceTypeLabel, sourceTypeProperty.enumValueIndex, sourceTypeContent);
+			property.FindPropertyRelative("sourceType").enumValueIndex = EditorGUILayout.Popup(sourceTypeLabel, property.FindPropertyRelative("sourceType").enumValueIndex, sourceTypeContent);
 
 			sourceTypeValue = (ImagerySourceType)sourceTypeProperty.enumValueIndex;
 			if(EditorGUI.EndChangeCheck())
 			{
+				Debug.Log(property.FindPropertyRelative("sourceType").enumValueIndex.ToString());
 				UpdateProperty(property);
 			}
 			var sourceOptionsProperty = property.FindPropertyRelative("sourceOptions");

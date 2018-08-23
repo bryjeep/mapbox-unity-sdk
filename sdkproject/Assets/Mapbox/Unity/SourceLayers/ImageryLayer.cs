@@ -116,8 +116,8 @@
 		public void Refresh()
 		{
 			Debug.Log("Refresh");
-
-			Factory.SetOptions(_layerProperty);
+			//still works if this is commented out??? v
+			//_imageFactory.SetOptions(_layerProperty);
 			NotifyUpdateLayer(_imageFactory);
 		}
 

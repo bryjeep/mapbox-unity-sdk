@@ -86,6 +86,8 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 
 		protected override void OnRegistered(UnityTile tile)
 		{
+			//not updated, check up the call chain
+			//Debug.Log(_properties.sourceType.ToString());
 			if (_properties.sourceType == ImagerySourceType.None)
 			{
 				Progress++;

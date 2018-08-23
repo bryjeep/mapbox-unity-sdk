@@ -15,7 +15,7 @@
 		{
 			if (OnPropertyUpdated != null)
 			{
-				Debug.Log("ImageryLayerProperties - OnPropertyUpdated");
+				Debug.Log("ImageryLayerProperties - OnPropertyUpdated - sourceType = " + sourceType.ToString());
 				OnPropertyUpdated();
 			}
 		}
