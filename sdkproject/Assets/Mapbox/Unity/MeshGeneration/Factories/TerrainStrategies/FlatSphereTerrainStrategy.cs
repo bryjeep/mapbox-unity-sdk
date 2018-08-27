@@ -23,7 +23,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 			{
 				tile.gameObject.layer = _elevationOptions.unityLayerOptions.layerId;
 			}
-
+/* 
 			if (tile.RasterDataState != Enums.TilePropertyState.Loaded)
 			{
 				tile.MeshRenderer.material = _elevationOptions.requiredOptions.baseMaterial;
@@ -34,6 +34,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 				tile.MeshFilter.mesh.Clear();
 				tile.ElevationType = TileTerrainType.Globe;
 			}
+*/			
 			GenerateTerrainMesh(tile);
 		}
 
